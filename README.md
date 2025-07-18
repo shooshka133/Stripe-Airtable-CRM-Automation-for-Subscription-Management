@@ -87,10 +87,10 @@ Records are matched/updated by `Email` field to keep CRM clean.
 
 ## ▶️ Demo
 
-📽️ *Coming soon*: Screencast showing full workflow from signup to payment and CRM update.
+📽️ *Str-demo.mp4
 
-*(You can also embed your OBS recording link or GitHub Pages preview here)*
-
+Give it a try here:
+https://shooshka133.github.io/Stripe-Airtable-CRM-Automation-for-Subscription-Management/
 ---
 
 ## 🖼️ Screenshots
