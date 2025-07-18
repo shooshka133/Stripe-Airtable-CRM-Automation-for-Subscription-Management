@@ -1,0 +1,998 @@
+{
+  "name": "Stripe to Airtable CRM Sync + Notifications",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4c7abb1e-0c51-44c6-99c6-12c25882cbbb",
+              "name": "name",
+              "value": "={{ $json.data.object.customer_details.name }}",
+              "type": "string"
+            },
+            {
+              "id": "c0f5eb95-5cbc-46d7-874b-c0cf7539e76c",
+              "name": "Email",
+              "value": "={{ $json.data.object.metadata.email }}",
+              "type": "string"
+            },
+            {
+              "id": "1e535488-545c-4716-b1f5-e2ccf1153fb0",
+              "name": "plan",
+              "value": "={{ $json.data.object.metadata.plan }}",
+              "type": "string"
+            },
+            {
+              "id": "2f1d6cb0-5010-4afd-be31-5cae5b2d28be",
+              "name": "payment_status",
+              "value": "={{ $json.data.object.payment_status }}",
+              "type": "string"
+            },
+            {
+              "id": "98e66d26-5d2e-445c-8402-9027d664f505",
+              "name": "session_id",
+              "value": "={{ $json.data.object.id }}",
+              "type": "string"
+            },
+            {
+              "id": "0a557295-e17a-43ae-8659-57470165ea1c",
+              "name": "created_time",
+              "value": "={{ new Date($json.data.object.created * 1000).toISOString() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        220,
+        80
+      ],
+      "id": "a6b4b483-2ebd-47fb-bbd3-488b0acbef86",
+      "name": "Extract Metadata"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.all()[0]?.json;\nconst matchedRecords = input.records || [];\n\nconst hasMatch = matchedRecords.length > 0;\n\nreturn [{\n  json: {\n    duplicate: hasMatch,\n    airtableId: hasMatch ? matchedRecords[0].id : null,\n    ...input\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        940,
+        880
+      ],
+      "id": "87377265-8201-4463-8ae5-e9be6007a1cf",
+      "name": "Code",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "events": [
+          "checkout.session.completed"
+        ]
+      },
+      "type": "n8n-nodes-base.stripeTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        80
+      ],
+      "id": "2908765f-d1da-4b4a-996f-e4c8121c348d",
+      "name": "Stripe Trigger",
+      "webhookId": "bbd90743-7dc2-4420-bb62-cb9ada97d327",
+      "credentials": {
+        "stripeApi": {
+          "id": "lM1swsqGvUgEQsBF",
+          "name": "Stripe account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "app20SK23ZhSnoeCK",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://airtable.com/app20SK23ZhSnoeCK"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblB6iz9jBVRgyT3I",
+          "mode": "list",
+          "cachedResultName": "Table 1",
+          "cachedResultUrl": "https://airtable.com/app20SK23ZhSnoeCK/tblB6iz9jBVRgyT3I"
+        },
+        "filterByFormula": "=LOWER({Email}) = LOWER('{{ $json.email }}')",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        380,
+        860
+      ],
+      "id": "82b943ed-ed67-49f6-92e2-9cb23083ad58",
+      "name": "Search records",
+      "alwaysOutputData": true,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "RoOC1yPY7TpBGwV4",
+          "name": "Airtable Personal Access Token account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1SS8oglIIwImCzKQ7RdDqIwPFMCXIH9gx1Ef8v_35ph4",
+          "mode": "list",
+          "cachedResultName": "subscription-table",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1SS8oglIIwImCzKQ7RdDqIwPFMCXIH9gx1Ef8v_35ph4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1SS8oglIIwImCzKQ7RdDqIwPFMCXIH9gx1Ef8v_35ph4/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "email",
+              "lookupValue": "={{ $json.email }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "6a49e38f-0f48-40bd-8ef3-bcdf7a900b9c",
+      "name": "Check if User Exists",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        320,
+        -220
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "cyAYaIjUILmFPTLx",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "2e6811a5-62ff-453f-9011-4a16e86a5599",
+              "leftValue": "={{ $json.duplicate }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "e66250f7-0802-4e3b-b81f-8097f9e9b4e5",
+      "name": "If New User",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        640,
+        -220
+      ],
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1SS8oglIIwImCzKQ7RdDqIwPFMCXIH9gx1Ef8v_35ph4",
+          "mode": "list",
+          "cachedResultName": "subscription-table",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1SS8oglIIwImCzKQ7RdDqIwPFMCXIH9gx1Ef8v_35ph4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1SS8oglIIwImCzKQ7RdDqIwPFMCXIH9gx1Ef8v_35ph4/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "name": "={{ $json.name }}",
+            "plan": "={{ $json.plan }}",
+            "email": "={{ $json.email }}",
+            "timestamp": "={{ $json.timestamp }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "plan",
+              "displayName": "plan",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "4ef0be73-0bdd-4f22-9bdb-5f61edfea7cc",
+      "name": "Append to Google Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        860,
+        -360
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "cyAYaIjUILmFPTLx",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "unit": "seconds"
+      },
+      "id": "2348220b-780e-4e29-9740-f54314ebce14",
+      "name": "Delay Before Stripe",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [
+        1040,
+        -200
+      ],
+      "webhookId": "15441280-6ee0-4da8-915c-440af78bc491"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "start-process",
+        "responseMode": "lastNode",
+        "options": {
+          "rawBody": false
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        -220
+      ],
+      "id": "0ac951ce-86d3-4060-be63-2726fac10788",
+      "name": "Webhook1",
+      "webhookId": "e5340f10-ca03-417a-af91-774bb9300b71"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7e55152f-0699-4a02-a170-d2bde9c38f82",
+              "name": "payment_url",
+              "value": "={{ $json.url }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1340,
+        -200
+      ],
+      "id": "74782a7c-fc02-4906-a9b9-e5bfb9ec64d7",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "df54c941-d236-4c67-8600-495cee1b99b4",
+              "name": "plan",
+              "value": "={{ $json.plan }}",
+              "type": "string"
+            },
+            {
+              "id": "2cf801ce-6d31-44cf-a0bf-ca9c74994721",
+              "name": "email",
+              "value": "={{ $json.email }}",
+              "type": "string"
+            },
+            {
+              "id": "2157ed02-86c0-484e-b10d-b9a6e9ca288b",
+              "name": "name",
+              "value": "={{ $json.name }}",
+              "type": "string"
+            },
+            {
+              "id": "06e0ff14-5d36-4588-b2fd-c07c9b1fc005",
+              "name": "unit_amount",
+              "value": "={{ $json.plan === 'Basic' ? 1000 : $json.plan === 'Silver' ? 2000 : $json.plan === 'Gold' ? 5000 : 0 }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        860,
+        -200
+      ],
+      "id": "72cc0d93-b575-4c70-bbba-cd967236a9f2",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "bf237603-7097-4af7-a10b-f8cb67125f95",
+              "name": "name",
+              "value": "={{ $json.body.name }}",
+              "type": "string"
+            },
+            {
+              "id": "7502bddf-710b-462a-87e9-657592e8efa8",
+              "name": "email",
+              "value": "={{ $json.body.email }}",
+              "type": "string"
+            },
+            {
+              "id": "7a9d6b8c-0497-4a15-a431-602d3b249f5e",
+              "name": "plan",
+              "value": "={{ $json.body.plan }}",
+              "type": "string"
+            },
+            {
+              "id": "69626023-7331-4e96-af1e-82d6f5869383",
+              "name": "timestamp",
+              "value": "={{ $now.toISO()}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        160,
+        -220
+      ],
+      "id": "9e7bbdad-65b9-4387-aa73-7792c8fa98ac",
+      "name": "Set User Data"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.stripe.com/v1/checkout/sessions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "stripeApi",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "success_url",
+              "value": "https://shooshka133.github.io/Stripe-Airtable-CRM-Automation-for-Subscription-Management/success.html"
+            },
+            {
+              "name": "cancel_url",
+              "value": "https://shooshka133.github.io/Stripe-Airtable-CRM-Automation-for-Subscription-Management/cancel.html"
+            },
+            {
+              "name": "payment_method_types[0]",
+              "value": "card"
+            },
+            {
+              "name": "mode",
+              "value": "payment"
+            },
+            {
+              "name": "line_items[0][price_data][currency]",
+              "value": "usd"
+            },
+            {
+              "name": "line_items[0][price_data][product_data][name]",
+              "value": "={{ $json.plan || 'Book Plan' }}\n"
+            },
+            {
+              "name": "line_items[0][price_data][unit_amount]",
+              "value": "={{ $json.plan === 'Basic' ? 1000 : $json.plan === 'Silver' ? 2000 : $json.plan === 'Gold' ? 5000 : 0 }}"
+            },
+            {
+              "name": "line_items[0][quantity]",
+              "value": "1"
+            },
+            {
+              "name": "metadata[email]",
+              "value": "={{ $json.email }}"
+            },
+            {
+              "name": "metadata[name]",
+              "value": "={{ $json.name }}"
+            },
+            {
+              "name": "metadata[plan]",
+              "value": "={{ $json.plan }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1200,
+        -200
+      ],
+      "id": "825f1f28-8651-4926-a8a6-3267a1c849e1",
+      "name": "Create Stripe Checkout",
+      "credentials": {
+        "stripeApi": {
+          "id": "zlXZeukuWcCHusou",
+          "name": "Stripe account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const userInput = $('Set User Data').first().json;\nconst submittedEmail = userInput.email?.toLowerCase().trim();\n\nif (items.length === 0) {\n  // Sheet is empty — first entry ever\n  return [{ json: { duplicate: false, ...userInput } }];\n}\n\nfor (const row of items) {\n  const sheetEmail = (row.json.email || '').toLowerCase().trim();\n  if (sheetEmail === submittedEmail) {\n    return [{ json: { duplicate: true, ...userInput } }];\n  }\n}\n\n// No match found\nreturn [{ json: { duplicate: false, ...userInput } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        -220
+      ],
+      "id": "11d5e0b2-20ce-4c56-8303-0f49c045ab1e",
+      "name": "Filter Duplicate Email"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        660,
+        880
+      ],
+      "id": "1bf6ded9-95be-410a-ac8a-39cb78c90b6b",
+      "name": "Merge",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "base": {
+          "__rl": true,
+          "value": "app20SK23ZhSnoeCK",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://airtable.com/app20SK23ZhSnoeCK"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblB6iz9jBVRgyT3I",
+          "mode": "list",
+          "cachedResultName": "Table 1",
+          "cachedResultUrl": "https://airtable.com/app20SK23ZhSnoeCK/tblB6iz9jBVRgyT3I"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $json.name }}",
+            "Plan": "={{ $json.plan }}",
+            "Session ID": "={{ $json.session_id }}",
+            "Payment Status": "={{ $json.payment_status }}",
+            "Created Time": "={{ $json.created_time }}",
+            "Email": "={{ $json.Email }}"
+          },
+          "matchingColumns": [
+            "Email"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Plan",
+              "displayName": "Plan",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Free",
+                  "value": "Free"
+                },
+                {
+                  "name": "Basic",
+                  "value": "Basic"
+                },
+                {
+                  "name": "Silver",
+                  "value": "Silver"
+                },
+                {
+                  "name": "Gold",
+                  "value": "Gold"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Session ID",
+              "displayName": "Session ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Payment Status",
+              "displayName": "Payment Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "paid",
+                  "value": "paid"
+                },
+                {
+                  "name": "failed",
+                  "value": "failed"
+                },
+                {
+                  "name": "",
+                  "value": ""
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Created Time",
+              "displayName": "Created Time",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        440,
+        80
+      ],
+      "id": "8d739722-c6e4-4e14-a5ee-4867bbaa5a3c",
+      "name": "Create or update a record",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "RoOC1yPY7TpBGwV4",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Generate PDF HTML').item.json.fields.Email }}",
+        "subject": "='Hello' {{ $('Generate PDF HTML').item.json.fields.Name }}",
+        "message": "=Thanks for subscribing to the {{ $('Generate PDF HTML').item.json.fields.Plan }} plan.\n\nAttached is your payment receipt.\n\n– Shoosh Automation",
+        "options": {
+          "attachmentsUi": {
+            "attachmentsBinary": [
+              {
+                "property": "=data"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1320,
+        80
+      ],
+      "id": "53d53c8b-691e-4253-b7f8-095b6e9d2850",
+      "name": "Send a message",
+      "webhookId": "fbb3e3b1-ca28-44fa-99b7-1ad68f2775da",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "KMyk55vS8452iDVx",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2fdc4473-724c-481b-af5d-073fa00c6a05",
+              "name": "receipt_html",
+              "value": "=<h2>🧾 Shoosh Online Bookstore - Receipt</h2>\n<p><strong>Name:</strong> {{ $json.fields.Name }}</p>\n<p><strong>Email:</strong> {{ $json.fields.Email }}</p>\n<p><strong>Plan:</strong> {{ $json.fields.Plan }}</p>\n<p><strong>Amount:</strong> {{\n  $json.fields.Plan?.toLowerCase() === 'basic' ? '$10.00' :\n  $json.fields.Plan?.toLowerCase() === 'silver' ? '$20.00' :\n  $json.fields.Plan?.toLowerCase() === 'gold' ? '$50.00' : '$0.00'\n}}</p>\n<p><strong>Session ID:</strong> {{ $json.fields['Session ID'] }}</p>\n<p><strong>Date:</strong> {{ $json.fields['Created Time'] }}</p>\n<hr />\n<p>Thank you for your purchase!<br />– Shoosh Automation</p>\n",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        660,
+        80
+      ],
+      "id": "2612fce8-f870-46fe-b24a-e8b2e1151903",
+      "name": "Generate PDF HTML"
+    },
+    {
+      "parameters": {
+        "operation": "URL/HTML to PDF",
+        "convertType": "htmlToPDF",
+        "html": "={{ $json.receipt_html }}",
+        "advancedOptions": {}
+      },
+      "type": "n8n-nodes-pdfco.PDFco Api",
+      "typeVersion": 1,
+      "position": [
+        880,
+        80
+      ],
+      "id": "2d394c63-89ff-46ac-b844-4d5767f60964",
+      "name": "PDFco Api",
+      "alwaysOutputData": true,
+      "credentials": {
+        "pdfcoApi": {
+          "id": "Jc4ADbQRvmJc8Z7G",
+          "name": "PDF.co account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1120,
+        80
+      ],
+      "id": "d5665d5b-1ae6-4adf-8001-d85cb1bd8773",
+      "name": "HTTP Request"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Extract Metadata": {
+      "main": [
+        [
+          {
+            "node": "Create or update a record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Stripe Trigger": {
+      "main": [
+        [
+          {
+            "node": "Extract Metadata",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search records": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check if User Exists": {
+      "main": [
+        [
+          {
+            "node": "Filter Duplicate Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If New User": {
+      "main": [
+        [
+          {
+            "node": "Append to Google Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append to Google Sheet": {
+      "main": [
+        [
+          {
+            "node": "Delay Before Stripe",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delay Before Stripe": {
+      "main": [
+        [
+          {
+            "node": "Create Stripe Checkout",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook1": {
+      "main": [
+        [
+          {
+            "node": "Set User Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Delay Before Stripe",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set User Data": {
+      "main": [
+        [
+          {
+            "node": "Check if User Exists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Stripe Checkout": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Duplicate Email": {
+      "main": [
+        [
+          {
+            "node": "If New User",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        []
+      ]
+    },
+    "Create or update a record": {
+      "main": [
+        [
+          {
+            "node": "Generate PDF HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate PDF HTML": {
+      "main": [
+        [
+          {
+            "node": "PDFco Api",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PDFco Api": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "76024122-8026-4c0f-82dd-0cb7621c54ab",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c4fa2af4ffffdbdd7f776402656acf89f1c48d3d3e6806d045e4655c51958b10"
+  },
+  "id": "nQTWAAXPO9L8GVF9",
+  "tags": []
+}
