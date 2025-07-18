@@ -93,19 +93,12 @@ Records are matched/updated by `Email` field to keep CRM clean.
 
 ---
 
-## 📁 File Structure (if uploading assets)
+## 🖼️ Screenshots
 
-```sh
-├── form.html               # Hosted user form (optional)
-├── README.md
-├── screenshots/
-│   ├── form.png
-│   ├── stripe-checkout.png
-│   ├── airtable-record.png
-├── workflow-json/
-│   ├── part1-registration.json
-│   └── part2-stripe-webhook.json
-```
+| Google Sheets | Airtable | Gmail/PDF | n8n Workflow |
+|---------------|----------|--------|--------------|
+| ![](screenshots/subscription_table.png) | ![](screenshots/Leads_payment.png) | ![](screenshots/Gmail-notification-pdf-receipt.png) | ![](screenshots/workflow.png) |
+
 
 ---
 
