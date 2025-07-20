@@ -61,17 +61,27 @@
 </head>
 <body>
   <form id="reg-form">
-    <h1>Sign Up & Subscribe</h1>
-    <input name="name" placeholder="Name" required />
-    <input name="email" type="email" placeholder="Email" required />
-    <select name="plan" required>
-      <option value="">Select a Plan</option>
-      <option value="Basic">Basic - $10</option>
-      <option value="Silver">Silver - $20</option>
-      <option value="Gold">Gold - $50</option>
-    </select>
-    <button id="submit-btn" type="submit">Continue to Payment</button>
-  </form>
+  <h1>Sign Up & Subscribe</h1>
+  <input name="name" placeholder="Name" required />
+  <input name="email" type="email" placeholder="Email" required />
+  
+  <select name="plan" required>
+    <option value="">Select a Plan</option>
+    <option value="Basic">Basic - $10</option>
+    <option value="Silver">Silver - $20</option>
+    <option value="Gold">Gold - $50</option>
+  </select>
+
+  <!-- ✅ Add this: -->
+  <select name="subscription_type" required>
+    <option value="">Select Billing Frequency</option>
+    <option value="Monthly">Monthly</option>
+    <option value="Yearly">Yearly</option>
+  </select>
+
+  <button id="submit-btn" type="submit">Continue to Payment</button>
+</form>
+
 
   <script>
     document.getElementById("reg-form").addEventListener("submit", async function(e) {
