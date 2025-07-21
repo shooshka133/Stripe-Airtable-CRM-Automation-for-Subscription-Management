@@ -60,17 +60,11 @@
   </style>
 </head>
 <body>
-  <form id="reg-form" href="https://shoosh.app.n8n.cloud/webhook-test/start-process-renewal">
+<form id="reg-form" action="https://shoosh.app.n8n.cloud/webhook-test/start-process-renewal" method="POST">
   <h1>Sign Up & Subscribe</h1>
   <input name="name" placeholder="Name" required />
   <input name="email" type="email" placeholder="Email" required />
   
-  <select name="plan" required>
-    <option value="">Select a Plan</option>
-    <option value="Basic">Basic - $10</option>
-    <option value="Silver">Silver - $20</option>
-    <option value="Gold">Gold - $50</option>
-  </select>
 
   <button id="submit-btn" type="submit">Continue to Payment</button>
 </form>
